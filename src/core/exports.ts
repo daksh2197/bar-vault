@@ -31,7 +31,7 @@ export function barCsv(bottles: readonly Bottle[], pegMl: number): string {
   return [BAR_CSV_HEADER, ...rows].join('\n') + '\n';
 }
 
-/** "3 bottles low: Campari, dry vermouth, gin." Zero and one read naturally. */
+/** "3 bottles low: Bitterwick, dry vermouth, gin." Zero and one read naturally. */
 export function lowSummary(names: readonly string[]): string {
   if (names.length === 0) return 'No bottles are low.';
   const shown = names.slice(0, SUMMARY_NAMES);

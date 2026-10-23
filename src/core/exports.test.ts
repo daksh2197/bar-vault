@@ -92,7 +92,7 @@ describe('the bar CSV', () => {
 
 describe('the smart-home JSON', () => {
   const bar = [
-    bottle('a', { name: 'Campari', fillPct: 10, sizeMl: 1000, paidCents: 3000, category: 'liqueur' }),
+    bottle('a', { name: 'Bitterwick', fillPct: 10, sizeMl: 1000, paidCents: 3000, category: 'liqueur' }),
     bottle('b', { name: 'dry vermouth', fillPct: 5, category: 'vermouth' }),
     bottle('c', { name: 'gin', fillPct: 15 }),
     bottle('d', { name: 'rum', fillPct: 80, limited: true }),
@@ -112,13 +112,13 @@ describe('the smart-home JSON', () => {
   });
 
   it('works out ml and pegs left', () => {
-    expect(file.bottles[0]).toMatchObject({ name: 'Campari', mlLeft: 100, pegsLeft: 3, pricePerPegCents: 90, low: true, limited: false });
+    expect(file.bottles[0]).toMatchObject({ name: 'Bitterwick', mlLeft: 100, pegsLeft: 3, pricePerPegCents: 90, low: true, limited: false });
     expect(file.bottles[3]).toMatchObject({ limited: true, low: false });
   });
 
   it('lists low bottles emptiest first and writes the summary sentence', () => {
-    expect(file.lowBottles).toEqual(['dry vermouth', 'Campari', 'gin']);
-    expect(file.summary).toBe('3 bottles low: dry vermouth, Campari, gin.');
+    expect(file.lowBottles).toEqual(['dry vermouth', 'Bitterwick', 'gin']);
+    expect(file.summary).toBe('3 bottles low: dry vermouth, Bitterwick, gin.');
   });
 
   it('is valid JSON that parses back to the same thing', () => {
@@ -141,10 +141,10 @@ describe('the smart-home JSON', () => {
 
 describe('the one-line summary', () => {
   it('says no bottles are low for none', () => expect(lowSummary([])).toBe('No bottles are low.'));
-  it('uses the singular for one', () => expect(lowSummary(['Campari'])).toBe('1 bottle low: Campari.'));
+  it('uses the singular for one', () => expect(lowSummary(['Bitterwick'])).toBe('1 bottle low: Bitterwick.'));
   it('uses the plural and commas for two or more', () => {
     expect(lowSummary(['a', 'b'])).toBe('2 bottles low: a, b.');
-    expect(lowSummary(['Campari', 'dry vermouth', 'gin'])).toBe('3 bottles low: Campari, dry vermouth, gin.');
+    expect(lowSummary(['Bitterwick', 'dry vermouth', 'gin'])).toBe('3 bottles low: Bitterwick, dry vermouth, gin.');
   });
   it('names the first few and counts the rest', () => {
     const names = Array.from({ length: SUMMARY_NAMES + 3 }, (_, i) => `n${i}`);

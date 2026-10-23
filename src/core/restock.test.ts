@@ -4,7 +4,7 @@ import { bottle, bottlesArb, RUNS } from './fixtures';
 import { csvField, csvRow, lowBottles, shoppingItems, shoppingListCsv, SHOPPING_CSV_HEADER, shoppingListText, watchlist } from './restock';
 
 const bar = [
-  bottle('a', { name: 'Campari-ish', fillPct: 15, category: 'liqueur' }),
+  bottle('a', { name: 'Bitterwick-ish', fillPct: 15, category: 'liqueur' }),
   bottle('b', { name: 'Gin', fillPct: 5 }),
   bottle('c', { name: 'Rum', fillPct: 80, watch: true, watchNote: 'Cheaper on Oct 20' }),
   bottle('d', { name: 'Vermouth', fillPct: 10, watch: true, watchNote: 'ask, "dry"' }),
@@ -48,7 +48,7 @@ describe('the shopping list as text', () => {
   });
   it('shows percent left and pegs left for a low bottle', () => {
     expect(text).toContain('- Gin (gin, 750 ml): 5% left, 1 peg');
-    expect(text).toContain('- Campari-ish (liqueur, 750 ml): 15% left, 3 pegs');
+    expect(text).toContain('- Bitterwick-ish (liqueur, 750 ml): 15% left, 3 pegs');
   });
   it('carries the owner\'s watch note', () => {
     expect(text).toContain('- Rum (gin, 750 ml): Cheaper on Oct 20');
