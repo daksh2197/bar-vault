@@ -134,6 +134,12 @@ Want the guided tour? [docs/CTO-NOTES.md](docs/CTO-NOTES.md) explains the ideas 
 
 A test cannot see overlap or width, so the last three came from looking at the build in a browser.
 
+An independent review, by a second agent that had not seen the build, then found three more:
+
+- **An import that deleted rows it could not read.** Import rebuilt both stores from the rows the screen could parse, so a saved row the sanitiser rejected, and its photo, vanished on the next import, while the page said nothing is deleted. Import now writes only the rows it merged and clears nothing. A test keeps an unreadable row alive through an import.
+- **A spreadsheet formula hiding in a CSV.** A bottle named `=HYPERLINK(...)` went into the shopping list CSV as is, and a spreadsheet would run it. Fields that start with `=`, `+`, `-`, `@`, a tab or a return now get a leading quote. A property test checks that no exported field starts with one.
+- **A skip link that opened "Page not found".** The keyboard shortcut to the content pointed at `#app`, and the hash router read that as a screen name. Hashes that do not start with `#/` are now page jumps.
+
 ## How this was built
 
 I build with Claude as my pair programmer. I bring the problem and decide what the thing should do. Claude writes most of the code. I review it until I can explain every file, and [the CTO notes](docs/CTO-NOTES.md) are my study guide, in public. Every commit carries the co-author line.
