@@ -24,15 +24,15 @@ The usual way to do this is a spreadsheet, and a spreadsheet does not look like 
 - **Draws your shelf.** One bottle shape per category (whisky, gin, vodka, rum, tequila, brandy, liqueur, vermouth, wine, other). The orange inside is how full it is. An empty bottle is a dim outline. Tap one to open it.
 - **Works out what is left.** For every bottle: millilitres left, whole pegs left, price per peg, and the value left. You set the peg size (30, 45 or 60 ml, or anything from 5 to 500).
 - **Keeps the rarity as your tag.** Common, limited, numbered, allocated, discontinued or unknown, plus a limited-or-numbered flag and a free-text bottle number such as "214 of 1,000". A small diamond marks a flagged bottle on the shelf.
-- **Never fetches a price.** There is no price feed and no lookup. A reference price is three fields you type: amount, where you saw it, the date. No figure in the app uses it. "On sale" is a flag and a note you write yourself.
+- **Never fetches a price.** There is no price feed and no lookup. A reference price is three fields you type: amount, where you saw it, the date. No figure in the app uses it. The watchlist is a flag ("Watch this bottle") and a note you write yourself.
 - **Shows what is low.** Each bottle has its own low line, 20 percent unless you change it. The Restock screen lists the low ones and your watchlist, and makes a shopping list as text or CSV.
 - **Counts the bar.** Bottles, how many are low, total paid, value left, average and median price per peg, a histogram of price per peg, and paid by category. A gift entered as $0.00 is left out of the per-peg figures.
 - **Makes a file for voice routines.** A small JSON file (`bar-vault-smart-home/1`) and a one-line summary such as "3 bottles low: SAMPLE Cassory Dry Vermouth, SAMPLE Quillon Dry Gin, SAMPLE Bitterwick Red." It does not connect to Alexa, Google Home or Apple Home. You carry it across by hand. The three guides cite the vendor pages they rely on, and I did not run the steps on a real device.
-- **Backs up to a file.** Plain JSON, or locked with a passphrase (AES-GCM, key from PBKDF2). Photos are optional, up to 10 MB. Importing merges: when the same bottle is in both, the newer edit wins and nothing is deleted. Settings are not in the file.
+- **Backs up to a file.** Plain JSON, or locked with a passphrase (AES-GCM, key from PBKDF2). Photos are optional, up to 10 MB. Importing merges: when the same bottle is in both, the newer edit wins and nothing is deleted, not even a saved row the app cannot read. An edit dated after the moment of import counts as made at that moment, so a future date cannot win every merge. Settings are not in the file.
 - **Keeps photos on the device.** A photo is shrunk to 640 px on its longest side, saved as a JPEG in the browser's database, and never uploaded.
 - **Ships an invented sample bar.** Eleven made-up bottles, labelled "Invented sample bar, not a real one" wherever they show. One tap clears them.
 - **Says who it is for.** The About page reads: "For adults of legal drinking age where you live (18 in Alberta). This app records what you own. It gives no drinking advice."
-- **Works with no signal and keeps data on the device.** A service worker saves the app after the first visit. The built page ships a Content-Security-Policy that blocks every connection, so nothing you type can leave. The only way data goes anywhere is a file you save.
+- **Works with no signal and keeps data on the device.** A service worker saves the app after the first visit. The app makes no requests, and the Content-Security-Policy in the built page blocks fetch, XHR and outside images. The only way data goes anywhere is a file you save.
 
 ![Bar Vault on a laptop with the sample bar: the tab bar, the shelf and the sort control](docs/screenshots/desktop.png)
 
@@ -141,7 +141,7 @@ I build with Claude as my pair programmer. I bring the problem and decide what t
 ## Data, sources and limits
 
 - **Legal drinking age.** 18 in Alberta, Manitoba and Quebec, per Wikipedia, ["Alcoholic drinks in Canada"](https://en.wikipedia.org/wiki/Alcoholic_drinks_in_Canada). Fetched October 23, 2026.
-- **Voice assistants.** Alexa, Google Home and Apple Shortcuts are quoted from their own help pages, each with its URL and the fetch date of October 23, 2026, in [docs/SMART-HOME.md](docs/SMART-HOME.md). Anything those pages do not say is marked "not documented on the pages fetched".
+- **Voice assistants.** Alexa, Google Home and Apple Shortcuts are quoted from their vendor help pages, each with its URL and the fetch date of October 23, 2026, in [docs/SMART-HOME.md](docs/SMART-HOME.md). Amazon's pages were reached through an Amazon-hosted copy of the Alexa help (digprjsurvey.amazon.com), fetched Oct 23, 2026. Anything those pages do not say is marked "not documented on the pages fetched".
 - **Prices.** There is no price feed. Every price is one you typed.
 - **Storage, lock and form code.** Adapted from [Coin Vault](https://github.com/daksh2197/coin-vault) (MIT, same author). Each adapted file says so in its first line.
 - **Fonts.** Bricolage Grotesque, Geist and Geist Mono ship inside the app under the SIL Open Font License 1.1. The notices are in [public/THIRD-PARTY-NOTICES.txt](public/THIRD-PARTY-NOTICES.txt).

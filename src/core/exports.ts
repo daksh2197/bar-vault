@@ -20,7 +20,7 @@ export function barCsv(bottles: readonly Bottle[], pegMl: number): string {
       String(b.fillPct),
       String(d.mlLeft),
       String(d.pegsLeft),
-      centsToPlain(d.pricePerPegCents),
+      b.paidCents === 0 ? '' : centsToPlain(d.pricePerPegCents),
       String(d.low),
       String(b.limited),
       b.rarity,
@@ -51,7 +51,8 @@ export interface SmartHomeFile {
     fillPct: number;
     mlLeft: number;
     pegsLeft: number;
-    pricePerPegCents: number;
+    /** Null for a bottle that cost nothing, because a gift has no price per peg. */
+    pricePerPegCents: number | null;
     low: boolean;
     limited: boolean;
   }[];
@@ -69,7 +70,7 @@ export function smartHome(bottles: readonly Bottle[], pegMl: number, now: Date):
       fillPct: b.fillPct,
       mlLeft: d.mlLeft,
       pegsLeft: d.pegsLeft,
-      pricePerPegCents: d.pricePerPegCents,
+      pricePerPegCents: b.paidCents === 0 ? null : d.pricePerPegCents,
       low: d.low,
       limited: b.limited,
     };

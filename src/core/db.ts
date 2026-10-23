@@ -67,8 +67,8 @@ export interface Vault {
   getPhoto(id: string): Promise<Photo | null>;
   deletePhoto(id: string): Promise<void>;
   allPhotos(): Promise<Photo[]>;
-  /** Replace every bottle and photo in one transaction. */
-  replaceAll(bottles: readonly Bottle[], photos: readonly Photo[]): Promise<void>;
+  /** Add or overwrite these rows in one transaction. Nothing else is touched, so rows that cannot be read are never lost. */
+  putMany(bottles: readonly Bottle[], photos: readonly Photo[]): Promise<void>;
   /** Erase bottles, photos, settings and the last-backup date. */
   wipe(): Promise<void>;
   setSettings(s: Settings): Promise<void>;
@@ -183,11 +183,10 @@ function makeVault(db: IDBDatabase): Vault {
       }),
     deletePhoto: (id) => run(['photos'], 'readwrite', async (tx) => void (await wrap(tx.objectStore('photos').delete(id)))),
     allPhotos: () => run(['photos'], 'readonly', readPhotos),
-    replaceAll: (bottles, photos) =>
+    putMany: (bottles, photos) =>
       run(['bottles', 'photos'], 'readwrite', async (tx) => {
         const bs = tx.objectStore('bottles');
         const ps = tx.objectStore('photos');
-        await Promise.all([wrap(bs.clear()), wrap(ps.clear())]);
         await Promise.all([...bottles.map((b) => wrap(bs.put(b))), ...photos.map((p) => wrap(ps.put({ id: p.id, type: p.type, bytes: p.bytes })))]);
       }),
     wipe: () =>

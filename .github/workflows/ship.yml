@@ -1,3 +1,4 @@
+# Adapted from coin-vault (MIT, Daksh Dua)
 # Every push to main and every pull request runs this file on a fresh computer in GitHub's cloud.
 #
 #   1. test    - install, run the tests, build the app
@@ -8,6 +9,9 @@
 # While the repo is private, only the tests and the build run. The deploy steps are skipped.
 # The day the repo goes public, set Settings > Pages > Source to "GitHub Actions" and
 # run this workflow once from the Actions tab. From then on every push to main deploys.
+#
+# Set Settings > Pages > Source to GitHub Actions BEFORE the first public push. Without it the
+# "Ask GitHub where this site will live" step fails and the badge goes red.
 
 name: Test and ship
 
@@ -23,7 +27,8 @@ permissions:
 # If two pushes land close together, only the newest one needs to finish.
 concurrency:
   group: ship-${{ github.ref }}
-  cancel-in-progress: true
+  # A deploy that is already running on main must finish, so nothing is cancelled mid-flight.
+  cancel-in-progress: false
 
 jobs:
   test:

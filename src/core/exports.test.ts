@@ -36,6 +36,8 @@ function parseCsv(text: string): string[][] {
   return rows;
 }
 
+const guard = (v: string): string => (/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
+
 describe('the bar CSV', () => {
   it('starts with the exact header the spec names', () => {
     expect(BAR_CSV_HEADER).toBe('name,category,size_ml,fill_pct,ml_left,pegs_left,price_per_peg_cad,low,limited,rarity,bought_where,bought_on');
@@ -50,7 +52,7 @@ describe('the bar CSV', () => {
   it('writes the price per peg in dollars with two places, never in cents', () => {
     const row = parseCsv(barCsv([bottle('a', { paidCents: 5, sizeMl: 1, fillPct: 100 })], 30))[1]!;
     expect(row[6]).toBe('1.50');
-    expect(parseCsv(barCsv([bottle('b', { paidCents: 0 })], 30))[1]![6]).toBe('0.00');
+    expect(parseCsv(barCsv([bottle('b', { paidCents: 0 })], 30))[1]![6]).toBe('');
   });
 
   it('keeps commas, quotes and line breaks in a name (property)', () => {
@@ -58,7 +60,7 @@ describe('the bar CSV', () => {
       fc.property(fc.string({ maxLength: 120 }).filter((s) => s.trim() !== '' && !s.includes('\r')), (name) => {
         const rows = parseCsv(barCsv([bottle('a', { name: name.trim() })], 30));
         expect(rows).toHaveLength(2);
-        expect(rows[1]![0]).toBe(name.trim());
+        expect(rows[1]![0]).toBe(guard(name.trim()));
         expect(rows[1]).toHaveLength(12);
       }),
       RUNS,
@@ -72,16 +74,36 @@ describe('the bar CSV', () => {
         expect(rows).toHaveLength(bottles.length + 1);
         bottles.forEach((b, i) => {
           const r = rows[i + 1]!;
-          expect(r[0]).toBe(b.name);
+          expect(r[0]).toBe(guard(b.name));
           expect(r[1]).toBe(b.category);
           expect(r[2]).toBe(String(b.sizeMl));
           expect(r[9]).toBe(b.rarity);
-          expect(r[10]).toBe(b.boughtWhere ?? '');
+          expect(r[10]).toBe(guard(b.boughtWhere ?? ''));
           expect(r[11]).toBe(b.boughtOn ?? '');
         });
       }),
       RUNS,
     );
+  });
+
+  it('writes an empty price per peg for a gift, and a number for everything else', () => {
+    const rows = parseCsv(barCsv([bottle('a', { paidCents: 0 }), bottle('b', { paidCents: 4500, sizeMl: 750 })], 30));
+    expect(rows[1]![6]).toBe('');
+    expect(rows[2]![6]).toBe('1.80');
+  });
+
+  it('never starts any field with a formula character (property)', () => {
+    fc.assert(
+      fc.property(bottlesArb(6), (bottles) => {
+        const rows = parseCsv(barCsv(bottles, 30));
+        for (const row of rows.slice(1)) for (const f of row) expect(/^[=+\-@\t\r]/.test(f), JSON.stringify(f)).toBe(false);
+      }),
+      RUNS,
+    );
+  });
+
+  it('guards a name that looks like a formula', () => {
+    expect(parseCsv(barCsv([bottle('a', { name: '=cmd|calc' })], 30))[1]![0]).toBe("'=cmd|calc");
   });
 
   it('quotes a field only when it needs to', () => {
@@ -125,13 +147,20 @@ describe('the smart-home JSON', () => {
     expect(JSON.parse(smartHomeJson(bar, 30, NOW))).toEqual(file);
   });
 
-  it('never contains NaN or null for a random bar (property)', () => {
+  it('writes null, not 0, for the price per peg of a gift', () => {
+    const f = smartHome([bottle('g', { paidCents: 0 })], 30, NOW);
+    expect(f.bottles[0]!.pricePerPegCents).toBeNull();
+    expect(JSON.parse(smartHomeJson([bottle('g', { paidCents: 0 })], 30, NOW)).bottles[0].pricePerPegCents).toBeNull();
+  });
+
+  it('never contains NaN or a stray null for a random bar (property)', () => {
     fc.assert(
       fc.property(bottlesArb(8), fc.integer({ min: 5, max: 500 }), (bottles, peg) => {
         const text = smartHomeJson(bottles, peg, NOW);
         const back = JSON.parse(text) as ReturnType<typeof smartHome>;
         expect(back.bottles).toHaveLength(bottles.length);
-        for (const b of back.bottles) for (const v of Object.values(b)) expect(v).not.toBeNull();
+        back.bottles.forEach((x, i) => expect(x.pricePerPegCents === null).toBe(bottles[i]!.paidCents === 0));
+        for (const b of back.bottles) for (const [k, v] of Object.entries(b)) if (k !== 'pricePerPegCents') expect(v).not.toBeNull();
         expect(back.lowBottles).toHaveLength(bottles.filter((b) => b.fillPct <= b.lowPct).length);
       }),
       RUNS,

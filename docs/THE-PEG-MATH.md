@@ -68,9 +68,13 @@ divRoundHalfUp(n, d) = (2n + d) / (2d)     with bigint, where / drops the remain
 
 It runs on bigints. The product `paid x peg` is at most 10^12 x 500, which is under the largest integer a float holds exactly, so I did not need a bigint to dodge a wrong answer in that range. I used it because with bigint nothing about the result depends on what a float does, and the test can then check it a second way. The property test "rounding half up matches a separate bigint calculation" writes the same formula again in the test file and compares the two over random inputs.
 
+The value-left product is the one that needs bigint for a real reason: `paid x ml left` reaches 10^12 x 10^5 = 10^17, past 2^53 (about 9 x 10^15), where a float would be wrong. `valueLeftCents()` works in bigint for that.
+
 Money totals are bigints too (`totalPaidCents`, `valueLeftCents` in `barStats`), so adding 5,000 bottles cannot overflow.
 
 The shelf is the one place plain numbers are rounded as floats: the height of the orange is drawn in pixels with `Math.round`. No money or millilitre figure is read back from a drawing.
+
+A gift ($0.00) has no price per peg. The whole-bar CSV writes an empty `price_per_peg_cad` for it and the smart-home JSON writes `null`. Every CSV field that starts with `=`, `+`, `-`, `@`, a tab or a return gets a single quote in front, so a spreadsheet shows a bottle called `=1+1` as text.
 
 ## 5. Properties that hold for every input
 

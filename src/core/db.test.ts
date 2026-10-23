@@ -1,5 +1,6 @@
 // Adapted from coin-vault (MIT, Daksh Dua)
 import 'fake-indexeddb/auto';
+import { readFileSync } from 'node:fs';
 import { IDBFactory } from 'fake-indexeddb';
 import { describe, expect, it } from 'vitest';
 import { DB_NAME, DB_VERSION, MIGRATIONS, openVault, VaultError } from './db';
@@ -65,16 +66,36 @@ describe('the bar database', () => {
     again.close();
   });
 
-  it('replaces everything, photos too, in one go', async () => {
+  it('adds rows and photos in one go and leaves the others alone', async () => {
     const vault = await openVault(new IDBFactory());
     await vault.putBottle(bottle('old'));
     await vault.putPhoto(photo('old'));
-    await vault.replaceAll([bottle('n1'), bottle('n2')], [photo('n1')]);
+    await vault.putMany([bottle('n1'), bottle('n2'), bottle('old', { fillPct: 7 })], [photo('n1')]);
     const data = await vault.readAll();
-    expect(data.bottles.map((b) => b.id).sort()).toEqual(['n1', 'n2']);
-    expect((await vault.allPhotos()).map((p) => p.id)).toEqual(['n1']);
-    expect(await vault.getPhoto('old')).toBeNull();
+    expect(data.bottles.map((b) => b.id).sort()).toEqual(['n1', 'n2', 'old']);
+    expect(data.bottles.find((b) => b.id === 'old')!.fillPct).toBe(7);
+    expect((await vault.allPhotos()).map((p) => p.id).sort()).toEqual(['n1', 'old']);
     vault.close();
+  });
+
+  it('keeps a row on disk that cannot be read, and its photo, when an import is written', async () => {
+    const factory = new IDBFactory();
+    await makeV1(factory, [{ id: 'broken', name: '', sizeMl: 'lots' }, bottle('fine')]);
+    const vault = await openVault(factory);
+    await vault.putPhoto(photo('broken'));
+    expect((await vault.readAll()).unreadable).toBe(1);
+    await vault.putMany([bottle('imported')], [photo('imported')]);
+    const after = await vault.readAll();
+    expect(after.bottles.map((b) => b.id).sort()).toEqual(['fine', 'imported']);
+    expect(after.unreadable).toBe(1);
+    expect((await vault.allPhotos()).map((p) => p.id).sort()).toEqual(['broken', 'imported']);
+    vault.close();
+  });
+
+  it('has no method that clears the stores except the explicit wipe', () => {
+    const src = readFileSync(new URL('./db.ts', import.meta.url), 'utf8');
+    expect(src.match(/\.clear\(\)/g)?.length).toBe(1);
+    expect(src.indexOf('.clear()')).toBeGreaterThan(src.indexOf('wipe: () =>'));
   });
 
   it('wipes bottles, photos, settings and the backup date', async () => {

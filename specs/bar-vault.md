@@ -34,12 +34,12 @@ Repo: `daksh2197/bar-vault`.
 
 ```
 { "format": "bar-vault-smart-home/1", "generated": ISO, "pegMl": 30,
-  "bottles": [ { "name", "category", "sizeMl", "fillPct", "mlLeft", "pegsLeft", "pricePerPegCents", "low": bool, "limited": bool } ],
+  "bottles": [ { "name", "category", "sizeMl", "fillPct", "mlLeft", "pegsLeft", "pricePerPegCents" (null for a bottle paid nothing for), "low": bool, "limited": bool } ],
   "lowBottles": [ "name", ... ],
   "summary": "3 bottles low: SAMPLE Cassory Dry Vermouth, SAMPLE Quillon Dry Gin, SAMPLE Bitterwick Red." }
 ```
 
-Bar CSV columns: `name,category,size_ml,fill_pct,ml_left,pegs_left,price_per_peg_cad,low,limited,rarity,bought_where,bought_on`. The sample bar uses invented names only.
+Bar CSV (`price_per_peg_cad` is empty for a gift; a field starting with = + - @ tab or return gets a leading single quote) columns: `name,category,size_ml,fill_pct,ml_left,pegs_left,price_per_peg_cad,low,limited,rarity,bought_where,bought_on`. The sample bar uses invented names only.
 
 ## Module map
 

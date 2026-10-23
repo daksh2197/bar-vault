@@ -17,7 +17,7 @@ import { backupScreen } from './ui/backup-screen';
 import { bottleFormScreen } from './ui/bottle-form';
 import type { Ctx, State } from './ui/ctx';
 import { el, h } from './ui/dom';
-import { navGroup, parseRoute, type Route } from './ui/route';
+import { isPageAnchor, navGroup, parseRoute, type Route } from './ui/route';
 import { aboutScreen, bottlesScreen, clearSample, loadSample, moreScreen, notFoundScreen, releasePhotoUrls, restockScreen, runCleanups, settingsScreen, shelfScreen, statsScreen } from './ui/screens';
 import { smartHomeScreen } from './ui/smarthome';
 
@@ -166,7 +166,14 @@ function wireGlobalClicks(): void {
 async function start(): Promise<void> {
   if (new URLSearchParams(location.search).has('embed')) document.documentElement.dataset.embed = '';
   wireGlobalClicks();
-  window.addEventListener('hashchange', render);
+  // A jump to an anchor on the page (the skip link) is not a screen change. Leave the screen as it is.
+  window.addEventListener('hashchange', () => {
+    if (!isPageAnchor(location.hash)) render();
+  });
+  document.querySelector('.skip')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    el('app').focus();
+  });
   try {
     vault = await openVault();
   } catch (error) {

@@ -577,9 +577,9 @@ export function aboutScreen(): HTMLElement {
       h('h2', { id: 'about-h' }, 'What this is'),
       h('p', {}, 'Bar Vault is a ledger for the bottles in a home bar: what you own, how much is left, what each peg cost, which bottles you tagged as rare, and what is low.'),
       h('p', { id: 'about-age' }, 'For adults of legal drinking age where you live (18 in Alberta). This app records what you own. It gives no drinking advice.'),
-      h('p', { id: 'about-price' }, 'This app never fetches or guesses a price. Every price on screen is one you typed. A bottle is "on sale" only if you flag it yourself.'),
+      h('p', { id: 'about-price' }, 'This app never fetches or guesses a price. Every price on screen is one you typed. A bottle goes on the watchlist only when you tick "Watch this bottle" yourself.'),
       h('p', { id: 'about-sample' }, `The sample bar is invented. Its names are made up and it is labelled "${SAMPLE_LABEL}".`),
-      h('p', { id: 'about-privacy' }, 'Nothing you type leaves this device. After the page loads the app makes no network requests, and a Content-Security-Policy tag in the page tells the browser to block them. Bottles and photos live in this browser only.'),
+      h('p', { id: 'about-privacy' }, 'Nothing you type leaves this device. After the page loads the app makes no requests, and a Content-Security-Policy tag in the page blocks fetch, XHR and outside images. Bottles and photos live in this browser only.'),
     ),
     h(
       'section',

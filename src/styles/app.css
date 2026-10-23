@@ -642,7 +642,7 @@ a.btn.btn-primary:hover {
 }
 .shelf-svg .is-empty .outline {
   stroke-dasharray: 3 3;
-  stroke: rgba(237, 232, 221, 0.35);
+  stroke: rgba(237, 232, 221, 0.46);
 }
 .shelf-svg .is-empty .glass {
   fill: transparent;
@@ -921,6 +921,11 @@ textarea {
   gap: 16px 14px;
   margin: 0 0 12px;
 }
+@media (max-width: 420px) {
+  .stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 @media (min-width: 640px) {
   .stat-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -934,7 +939,8 @@ textarea {
   margin: 0;
 }
 .stat dd:first-of-type {
-  font: 700 clamp(20px, 5.4vw, 30px) / 1.2 var(--mono);
+  overflow-wrap: normal;
+  font: 700 clamp(15px, 4.2vw, 30px) / 1.2 var(--mono);
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }

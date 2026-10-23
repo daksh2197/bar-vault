@@ -52,7 +52,9 @@ describe('small sentences', () => {
   it('says the typed reference price and never more', () => {
     expect(marketLine(bottle('a'))).toBe('');
     expect(marketLine({ market: { amountCents: 26000 } })).toBe('Reference you typed: $260.00');
-    expect(marketLine({ market: { amountCents: 26000, source: 'a note', date: '2026-10-20' } })).toBe('Reference you typed: $260.00 at a note on 2026-10-20');
+    expect(marketLine({ market: { amountCents: 26000, source: 'a note', date: '2026-10-20' } })).toBe('Reference you typed: $260.00 (source: a note, date: 2026-10-20)');
+    expect(marketLine({ market: { amountCents: 26000, source: 'a note' } })).toBe('Reference you typed: $260.00 (source: a note)');
+    expect(marketLine({ market: { amountCents: 26000, date: '2026-10-20' } })).toBe('Reference you typed: $260.00 (date: 2026-10-20)');
   });
 
   it('counts low bottles', () => {

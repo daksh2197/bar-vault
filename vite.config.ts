@@ -13,8 +13,8 @@ const repoUrl = process.env.REPO_URL || pkg.repository?.url || 'https://github.c
 
 /**
  * The Content-Security-Policy the built page ships with. It lets the page run its own script and
- * style, show its own images and photos, and nothing else: connect-src is none, so the page's code
- * cannot send anything anywhere even if a bug tried. The dev server needs inline styles and a
+ * style, show its own images and photos, and nothing else. The app makes no requests, and the policy blocks
+ * fetch, XHR and outside images. (A meta policy does not govern links the user follows.) The dev server needs inline styles and a
  * socket, so the policy is only written into the production build.
  */
 const CSP = [

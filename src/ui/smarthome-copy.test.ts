@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { FETCHED, GUIDES, NOT_DOCUMENTED, NOT_DOCUMENTED_SUMMARY } from './smarthome-copy';
+import { AMAZON_NOTE, FETCHED, GUIDES, NOT_DOCUMENTED, NOT_DOCUMENTED_SUMMARY } from './smarthome-copy';
 
 const everyString = (): string[] => [
   FETCHED,
@@ -47,6 +47,14 @@ describe('the smart-home guide copy', () => {
     const text = everyString().join('\n');
     expect(text).not.toMatch(/!|—|–/);
     expect(text).not.toMatch(/revolutionary|powerful|seamless|blazing|game-changing|robust|cutting-edge|unlock|leverage|supercharge/i);
+  });
+
+  it('says plainly that the Alexa pages came from an Amazon-hosted copy', () => {
+    expect(AMAZON_NOTE).toBe("Amazon's pages were reached through an Amazon-hosted copy of the Alexa help (digprjsurvey.amazon.com), fetched Oct 23, 2026");
+    expect(GUIDES.find((g) => g.id === 'alexa')!.intro).toContain(AMAZON_NOTE);
+    expect(readFileSync(new URL('../../docs/SMART-HOME.md', import.meta.url), 'utf8')).toContain(AMAZON_NOTE);
+    expect(readFileSync(new URL('../../README.md', import.meta.url), 'utf8')).toContain(AMAZON_NOTE);
+    expect(readFileSync(new URL('../../README.md', import.meta.url), 'utf8')).not.toContain('quoted from their own help pages');
   });
 
   it('is mirrored in docs/SMART-HOME.md: every URL and the exact not-documented phrase', () => {

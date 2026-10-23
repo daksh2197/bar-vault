@@ -71,6 +71,25 @@ describe('csv writing', () => {
   ])('writes %j as %j', (value, want) => {
     expect(csvField(value)).toBe(want);
   });
+  it.each(['=1+1', '+1', '-1', '@SUM(A1)', '\tx', '\rx'])('puts a single quote in front of %j so a spreadsheet shows it as text', (value) => {
+    const out = csvField(value);
+    expect(out.replace(/^"/, '').startsWith("'")).toBe(true);
+  });
+  it('quotes and guards together', () => expect(csvField('=1,2')).toBe('"\'=1,2"'));
+  it('leaves a name with a dash or equals sign in the middle alone', () => {
+    expect(csvField('Gin - dry')).toBe('Gin - dry');
+    expect(csvField('a=b')).toBe('a=b');
+  });
+  it('never writes a field that starts with a formula character (property)', () => {
+    fc.assert(
+      fc.property(fc.string({ maxLength: 60 }), (v) => {
+        const out = csvField(v);
+        const bare = out.startsWith('"') ? out.slice(1) : out;
+        expect(/^[=+\-@\t\r]/.test(bare)).toBe(false);
+      }),
+      RUNS,
+    );
+  });
   it('joins a row with commas', () => expect(csvRow(['a', 'b,c', 'd'])).toBe('a,"b,c",d'));
   it('writes the shopping CSV header first', () => {
     expect(shoppingListCsv(bar).split('\n')[0]).toBe(SHOPPING_CSV_HEADER);
@@ -81,6 +100,11 @@ describe('csv writing', () => {
     expect(csv).toContain('Gin,gin,750,5,low,');
     expect(csv).toContain('Rum,gin,750,80,watching,Cheaper on Oct 20');
     expect(csv).toContain('Vermouth,gin,750,10,low and watching,"ask, ""dry"""');
+  });
+  it('guards a bottle name and a watch note in the shopping CSV', () => {
+    const csv = shoppingListCsv([bottle('z', { name: '=HYPERLINK("x")', fillPct: 1, watch: true, watchNote: '@home' })]);
+    expect(csv).toContain("\"'=HYPERLINK(\"\"x\"\")\"");
+    expect(csv).toContain(",'@home");
   });
   it('is only the header when there is nothing to buy', () => {
     expect(shoppingListCsv([])).toBe(SHOPPING_CSV_HEADER + '\n');

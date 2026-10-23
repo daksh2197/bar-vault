@@ -44,9 +44,13 @@ export function shoppingListText(bottles: readonly Bottle[], pegMl: number, toda
   return lines.join('\n');
 }
 
-/** Quote a field when it holds a comma, a quote or a line break. A quote inside is doubled. */
+/**
+ * A spreadsheet reads a cell that starts with = + - @ tab or return as a formula. Such a field gets a single quote in front,
+ * which the spreadsheet shows as plain text. Then the field is quoted if it holds a comma, a quote or a line break, and a quote inside is doubled.
+ */
 export function csvField(value: string): string {
-  return /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[",\r\n]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
 }
 
 export const csvRow = (fields: readonly string[]): string => fields.map(csvField).join(',');

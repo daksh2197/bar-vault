@@ -41,7 +41,7 @@ export function smartHomeScreen(ctx: Ctx): HTMLElement {
         field('format', `Always "${SMART_HOME_FORMAT}".`),
         field('generated', 'The time the file was made.'),
         field('pegMl', 'Your peg size in ml.'),
-        field('bottles', 'One entry per bottle: name, category, sizeMl, fillPct, mlLeft, pegsLeft, pricePerPegCents, low, limited.'),
+        field('bottles', 'One entry per bottle: name, category, sizeMl, fillPct, mlLeft, pegsLeft, pricePerPegCents, low, limited. pricePerPegCents is null for a bottle you paid nothing for.'),
         field('lowBottles', 'Names of the low bottles, emptiest first.'),
         field('summary', 'The one-line sentence above.'),
       ),

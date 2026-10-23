@@ -4,6 +4,7 @@
  * This module reads and checks files. It never trusts them: every row goes through schema.ts and photo.ts.
  */
 
+import { isIsoTimestamp } from './dates';
 import { type Result, fail } from './decimal';
 import { BACKUP_PHOTO_CAP_BYTES, decodePhoto, encodePhotos, megabytes, type PhotoFileEntry, photoBytes } from './photo';
 import { sanitizeBottle } from './schema';
@@ -68,7 +69,7 @@ export type ParsedFile = { kind: 'plain'; contents: VaultContents } | { kind: 'e
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /** First look at a file's text. An encrypted envelope is only recognised here; lock.ts opens it. */
-export function parseVaultText(text: string): Result<ParsedFile> {
+export function parseVaultText(text: string, now: Date = new Date()): Result<ParsedFile> {
   if (text.length > MAX_FILE_BYTES) return fail(TOO_LARGE);
   let json: unknown;
   try {
@@ -78,11 +79,11 @@ export function parseVaultText(text: string): Result<ParsedFile> {
   }
   if (!isRecord(json)) return fail(NOT_A_VAULT);
   if (json.format === ENCRYPTED_FORMAT) return { ok: true, value: { kind: 'encrypted', file: json } };
-  return validateExport(json);
+  return validateExport(json, now);
 }
 
 /** Check a decoded export. Also used on the plaintext inside an encrypted file. */
-export function validateExport(json: unknown): Result<ParsedFile> {
+export function validateExport(json: unknown, now: Date = new Date()): Result<ParsedFile> {
   if (!isRecord(json) || json.format !== EXPORT_FORMAT) return fail(NOT_A_VAULT);
   const { schema, exportedAt, bottles, photos } = json;
   if (!Number.isSafeInteger(schema) || (schema as number) < 1) return fail(NOT_A_VAULT);
@@ -97,6 +98,8 @@ export function validateExport(json: unknown): Result<ParsedFile> {
     if (!b.ok) return fail(b.error);
     if (seen.has(b.value.id)) return fail(`Two bottles share the id ${b.value.id}.`);
     seen.add(b.value.id);
+    // A row dated after the moment of import would win every merge from now on. It is treated as edited now.
+    if (Date.parse(b.value.updatedAt) > now.getTime()) b.value.updatedAt = now.toISOString();
     cleanBottles.push(b.value);
   }
   const cleanPhotos: Photo[] = [];
@@ -114,7 +117,7 @@ export function validateExport(json: unknown): Result<ParsedFile> {
     ok: true,
     value: {
       kind: 'plain',
-      contents: { exportedAt: typeof exportedAt === 'string' ? exportedAt.slice(0, 40) : '', bottles: cleanBottles, photos: cleanPhotos },
+      contents: { exportedAt: typeof exportedAt === 'string' && isIsoTimestamp(exportedAt) ? exportedAt : '', bottles: cleanBottles, photos: cleanPhotos },
     },
   };
 }

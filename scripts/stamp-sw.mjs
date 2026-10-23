@@ -1,3 +1,4 @@
+// Adapted from coin-vault (MIT, Daksh Dua)
 /**
  * Runs after `vite build`. It writes two things into dist/sw.js:
  *

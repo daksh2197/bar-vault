@@ -29,7 +29,14 @@ const SIMPLE: Record<string, Route> = {
   about: { name: 'about' },
 };
 
+/**
+ * A hash such as #app is a jump to a spot on the page (the skip link uses one), not a screen.
+ * Only "", "#" and anything starting "#/" name a screen. Bare words like "restock" are still read, for tests and typed links.
+ */
+export const isPageAnchor = (hash: string): boolean => typeof hash === 'string' && hash.startsWith('#') && hash !== '#' && !hash.startsWith('#/');
+
 export function parseRoute(hash: string): Route {
+  if (isPageAnchor(hash)) return { name: 'shelf' };
   if (typeof hash !== 'string' || hash.length > 200) return { name: 'notfound' };
   let path = hash.startsWith('#') ? hash.slice(1) : hash;
   path = path.startsWith('/') ? path.slice(1) : path;

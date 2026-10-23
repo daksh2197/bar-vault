@@ -43,9 +43,8 @@ export function rarityLine(b: Pick<Bottle, 'rarity' | 'limited' | 'bottleNumber'
 /** The reference price the owner typed, with where and when. It is never looked up. */
 export function marketLine(b: Pick<Bottle, 'market'>): string {
   if (!b.market) return '';
-  const where = b.market.source ? ` at ${b.market.source}` : '';
-  const when = b.market.date ? ` on ${b.market.date}` : '';
-  return `Reference you typed: ${formatCents(BigInt(b.market.amountCents))}${where}${when}`;
+  const bits = [b.market.source ? `source: ${b.market.source}` : '', b.market.date ? `date: ${b.market.date}` : ''].filter(Boolean);
+  return `Reference you typed: ${formatCents(BigInt(b.market.amountCents))}${bits.length > 0 ? ` (${bits.join(', ')})` : ''}`;
 }
 
 export function lowCountWords(n: number): string {

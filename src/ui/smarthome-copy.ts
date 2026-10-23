@@ -7,6 +7,8 @@
  */
 
 export const FETCHED = 'fetched Oct 23, 2026';
+/** Said wherever the Alexa pages are cited, because they were not read on amazon.com itself. */
+export const AMAZON_NOTE = "Amazon's pages were reached through an Amazon-hosted copy of the Alexa help (digprjsurvey.amazon.com), fetched Oct 23, 2026";
 export const NOT_DOCUMENTED = 'not documented on the pages fetched for this build (Oct 23, 2026)';
 
 export interface Fact {
@@ -30,12 +32,12 @@ export const GUIDES: Guide[] = [
   {
     id: 'alexa',
     name: 'Alexa',
-    intro: 'Alexa Routines can hold a typed voice command. That is the documented hook, so the guide uses it for the shopping list.',
+    intro: `Alexa Routines can hold a typed voice command. That is the documented hook, so the guide uses it for the shopping list. ${AMAZON_NOTE}.`,
     documented: [
       {
         quote: 'Use a custom action to put an Alexa voice command into a routine.',
         url: 'https://digprjsurvey.amazon.com/csad/help/node/GLXY7RFX3L5GH2VR',
-        note: 'This page is an Amazon-hosted copy of the Alexa help pages. The same page says: "Type in what you want Alexa to do, just as you might say by voice, but without the wake word."',
+        note: 'The same page says: "Type in what you want Alexa to do, just as you might say by voice, but without the wake word."',
       },
       {
         quote: 'Add [item] to [list name].',

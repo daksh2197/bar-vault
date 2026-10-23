@@ -26,8 +26,11 @@ function text(over: Record<string, unknown> = {}, bottles: Bottle[] = [bottle('a
   return JSON.stringify({ ...built.value, ...over });
 }
 
+/** A clock far in the future, so the test dates are all in the past and none is clamped. */
+const FAR = new Date('2999-01-01T00:00:00.000Z');
+
 function plain(t: string) {
-  const r = parseVaultText(t);
+  const r = parseVaultText(t, FAR);
   if (!r.ok || r.value.kind !== 'plain') throw new Error(r.ok ? 'not plain' : r.error);
   return r.value.contents;
 }
@@ -138,9 +141,46 @@ describe('export and import', () => {
     expect(plain(text({}, [bottle('a', { name })])).bottles[0]!.name).toBe(name);
   });
 
-  it('truncates a very long exportedAt string', () => {
-    expect(plain(text({ exportedAt: 'x'.repeat(5000) })).exportedAt).toHaveLength(40);
+  it('shows an exportedAt only if it is a real timestamp', () => {
+    expect(plain(text({ exportedAt: 'x'.repeat(5000) })).exportedAt).toBe('');
+    expect(plain(text({ exportedAt: '<b>hi</b>' })).exportedAt).toBe('');
     expect(plain(text({ exportedAt: 5 })).exportedAt).toBe('');
+    expect(plain(text({ exportedAt: '2026-10-23T12:00:00.000Z' })).exportedAt).toBe('2026-10-23T12:00:00.000Z');
+  });
+
+  it('treats a row dated after the import as edited at the import time', () => {
+    const future = bottle('f', { updatedAt: '2999-01-01T00:00:00.000Z' });
+    const back = parseVaultText(text({}, [future, bottle('p')]), NOW);
+    if (!back.ok || back.value.kind !== 'plain') throw new Error('setup');
+    expect(back.value.contents.bottles.find((b) => b.id === 'f')!.updatedAt).toBe(NOW.toISOString());
+    expect(back.value.contents.bottles.find((b) => b.id === 'p')!.updatedAt).toBe(NOW.toISOString());
+  });
+
+  it('keeps a past updatedAt as it is', () => {
+    const past = bottle('p', { updatedAt: '2026-01-01T00:00:00.000Z' });
+    const back = parseVaultText(text({}, [past]), NOW);
+    expect(back.ok && back.value.kind === 'plain' && back.value.contents.bottles[0]!.updatedAt).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('cannot win every merge forever with a far-future date', () => {
+    const later = new Date('2026-10-24T00:00:00.000Z');
+    const imported = parseVaultText(text({}, [bottle('f', { name: 'imported', updatedAt: '2999-01-01T00:00:00.000Z' })]), NOW);
+    if (!imported.ok || imported.value.kind !== 'plain') throw new Error('setup');
+    // the bottle is then edited here, a day later
+    const edited = bottle('f', { name: 'edited here', updatedAt: later.toISOString() });
+    const merged = mergeBottles([edited], imported.value.contents.bottles);
+    expect(merged.bottles[0]!.name).toBe('edited here');
+  });
+
+  it('never leaves an updatedAt after the import time (property)', () => {
+    fc.assert(
+      fc.property(bottlesArb(6), (bottles) => {
+        const r = parseVaultText(text({}, bottles), NOW);
+        if (!r.ok || r.value.kind !== 'plain') throw new Error('setup');
+        for (const b of r.value.contents.bottles) expect(Date.parse(b.updatedAt)).toBeLessThanOrEqual(NOW.getTime());
+      }),
+      RUNS,
+    );
   });
 
   it('refuses too many bottles', () => {
@@ -197,7 +237,7 @@ describe('locked backups', () => {
     expect(JSON.stringify(locked)).not.toContain('Gin');
     const parsed = parseVaultText(JSON.stringify(locked));
     expect(parsed.ok && parsed.value.kind).toBe('encrypted');
-    const opened = validateExport(JSON.parse(await unlockText(locked, 'correct horse battery')));
+    const opened = validateExport(JSON.parse(await unlockText(locked, 'correct horse battery')), FAR);
     expect(opened.ok && opened.value.kind === 'plain' && opened.value.contents.bottles).toEqual(bottles);
     expect(opened.ok && opened.value.kind === 'plain' && opened.value.contents.photos).toEqual([photo('a', 500)]);
   });
@@ -208,7 +248,7 @@ describe('locked backups', () => {
         const built = buildExport(bottles, null, NOW);
         if (!built.ok) throw new Error('setup');
         const locked = await lockText(serializeExport(built.value), 'passphrase one', MIN_ITERATIONS);
-        const opened = validateExport(JSON.parse(await unlockText(JSON.parse(JSON.stringify(locked)), 'passphrase one')));
+        const opened = validateExport(JSON.parse(await unlockText(JSON.parse(JSON.stringify(locked)), 'passphrase one')), FAR);
         expect(opened.ok && opened.value.kind === 'plain' && opened.value.contents.bottles).toEqual(bottles);
       }),
       { numRuns: 15 },

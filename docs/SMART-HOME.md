@@ -33,11 +33,13 @@ Format string: `bar-vault-smart-home/1`. Every value is computed on the device f
 }
 ```
 
+`pricePerPegCents` is `null` for a bottle you paid nothing for, because a gift has no price per peg. In the whole-bar CSV the `price_per_peg_cad` field is empty for the same reason.
+
 The summary reads "No bottles are low." for none, "1 bottle low: Bitterwick." for one, and "3 bottles low: Bitterwick, dry vermouth, gin." for three. Past eight names it lists eight and says how many more.
 
 ## What the vendor pages say
 
-All pages fetched Oct 23, 2026. The two Alexa pages were reached through digprjsurvey.amazon.com, an Amazon-hosted copy of the Alexa help pages that a search returned. I did not fetch amazon.com/alexa pages directly.
+All pages fetched Oct 23, 2026. Amazon's pages were reached through an Amazon-hosted copy of the Alexa help (digprjsurvey.amazon.com), fetched Oct 23, 2026. I did not fetch amazon.com/alexa pages directly.
 
 | Platform | Capability | Answer | Evidence |
 |---|---|---|---|

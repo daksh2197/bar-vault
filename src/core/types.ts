@@ -1,3 +1,4 @@
+// Adapted from coin-vault (MIT, Daksh Dua)
 export const CATEGORIES = ['whisky', 'gin', 'vodka', 'rum', 'tequila', 'brandy', 'liqueur', 'vermouth', 'wine', 'other'] as const;
 export type Category = (typeof CATEGORIES)[number];
 export const CATEGORY_LABEL: Record<Category, string> = {

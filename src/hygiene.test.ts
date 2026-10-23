@@ -59,9 +59,33 @@ describe('rules that hold for the whole repo', () => {
     expect(read(join(root, 'index.html'))).toContain('%CSP%');
   });
 
-  it('carries the adapted-from header on every file taken from coin-vault', () => {
-    for (const f of ['core/decimal.ts', 'core/money.ts', 'core/dates.ts', 'core/lock.ts', 'core/db.ts', 'core/vaultfile.ts', 'core/schema.ts', 'core/form.ts', 'core/sample.ts', 'ui/dom.ts', 'ui/words.ts']) {
-      expect(read(join(root, 'src', f)).split('\n', 3).join('\n'), f).toContain('Adapted from coin-vault (MIT, Daksh Dua)');
+  it('carries the adapted-from header in the first line of every file taken from coin-vault', () => {
+    const adapted = ['src/core/decimal.ts', 'src/core/money.ts', 'src/core/dates.ts', 'src/core/lock.ts', 'src/core/db.ts', 'src/core/vaultfile.ts', 'src/core/schema.ts', 'src/core/form.ts', 'src/core/sample.ts', 'src/core/types.ts', 'src/ui/dom.ts', 'src/ui/words.ts', 'vite.config.ts', 'public/sw.js', 'scripts/stamp-sw.mjs', '.github/workflows/ship.yml'];
+    for (const f of adapted) expect(read(join(root, f)).split('\n', 1)[0], f).toMatch(/^(\/\/|#) Adapted from coin-vault \(MIT, Daksh Dua\)$/);
+  });
+
+  it('keeps a deploy that is already running from being cancelled, and says Pages must be switched on first', () => {
+    const wf = read(join(root, '.github/workflows/ship.yml'));
+    expect(wf).toContain('cancel-in-progress: false');
+    expect(wf).toContain('Settings > Pages > Source to GitHub Actions BEFORE the first public push');
+    expect(read(join(root, 'docs/CTO-NOTES.md'))).toContain('Set Settings > Pages > Source to GitHub Actions before the first public push');
+  });
+
+  it('does not say the policy stops everything, only what it does', () => {
+    for (const f of ['README.md', 'docs/CTO-NOTES.md']) {
+      expect(read(join(root, f)), f).not.toMatch(/cannot send anything anywhere|blocks every connection/);
+      expect(read(join(root, f)), f).toContain('blocks fetch, XHR and outside images');
     }
+  });
+
+  it('keeps the dark-mode empty-bottle outline at 3:1 against the page', () => {
+    const css = read(join(root, 'src/styles/app.css'));
+    const alpha = Number(/is-empty \.outline \{[^}]*rgba\(237, 232, 221, ([\d.]+)\)/.exec(css)?.[1]);
+    const mix = (a: number, c: number, g: number): number => Math.round(g + a * (c - g));
+    const lin = (v: number): number => ((v / 255) ** 2.2);
+    const lum = (r: number, g: number, b: number): number => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    const fg = lum(mix(alpha, 237, 17), mix(alpha, 232, 18), mix(alpha, 221, 20));
+    const bg = lum(17, 18, 20);
+    expect((fg + 0.05) / (bg + 0.05)).toBeGreaterThanOrEqual(3);
   });
 });

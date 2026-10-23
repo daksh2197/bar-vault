@@ -93,7 +93,7 @@ A pure function gets values in and gives values out, and does nothing else. `der
 
 ### Offline, and CI
 
-A service worker saves the app on the first visit, so it opens with no signal. A GitHub Actions file runs the tests on every push to main and every pull request, and deploys only if they pass and the repo is public. A Content-Security-Policy tag in the built page sets `connect-src 'none'`, so the page cannot send anything anywhere.
+A service worker saves the app on the first visit, so it opens with no signal. A GitHub Actions file runs the tests on every push to main and every pull request, and deploys only if they pass and the repo is public. A Content-Security-Policy tag in the built page sets `connect-src 'none'`. The app makes no requests, and the policy blocks fetch, XHR and outside images. (A policy in a meta tag does not govern links you follow.)
 
 - **See it:** [`public/sw.js`](../public/sw.js), [`scripts/stamp-sw.mjs`](../scripts/stamp-sw.mjs), [`.github/workflows/ship.yml`](../.github/workflows/ship.yml), and the `CSP` list in [`vite.config.ts`](../vite.config.ts).
 
@@ -107,12 +107,13 @@ A service worker saves the app on the first visit, so it opens with no signal. A
 | Totals, average, median, the histogram | `src/core/stats.ts` |
 | The low list, the watchlist, the shopping list | `src/core/restock.ts` |
 | The whole-bar CSV, the smart-home JSON and its summary | `src/core/exports.ts` |
+| CSV quoting, and the guard that stops a spreadsheet reading a name as a formula | `csvField()` in `src/core/restock.ts` |
 | Search and sort | `src/core/list.ts` |
 | What the add-a-bottle form accepts | `src/core/form.ts` |
 | What counts as a valid saved bottle, and its length limits | `src/core/schema.ts` |
 | The categories and rarity tags | `src/core/types.ts` |
 | The database, or a new migration | `src/core/db.ts` |
-| The backup file and merge rules | `src/core/vaultfile.ts` |
+| The backup file and merge rules (the import writes with `putMany()` and never clears a store) | `src/core/vaultfile.ts`, `src/core/db.ts` |
 | Passphrase rules and the lock | `src/core/lock.ts` |
 | Photo size, the backup cap | `src/core/photo.ts` |
 | The invented demo bottles | `src/core/sample.ts` |
@@ -144,6 +145,7 @@ A service worker saves the app on the first visit, so it opens with no signal. A
 | The smart-home summary ends "and 3 more" | It names at most eight bottles | `SUMMARY_NAMES` in `exports.ts` | Count the names. The JSON has every low bottle. |
 | The site still shows an old version after a deploy | GitHub Pages lets browsers reuse files for about 10 minutes | Nothing to fix | Wait, or hard-refresh. If it is still old, check the Actions tab. |
 | It does not work offline when you run it with `npm run dev` | The service worker is only registered in the built app | `main.ts` (`import.meta.env.PROD`) | Run `npm run build`, then `npm run preview`. |
+| Red badge on the first public push, at "Ask GitHub where this site will live" | Pages is not switched on yet | `.github/workflows/ship.yml` | Set Settings > Pages > Source to GitHub Actions before the first public push, or the "Ask GitHub where this site will live" step fails and the badge goes red. |
 | Green check, but no website | The repo is private, so the deploy steps are skipped on purpose | `.github/workflows/ship.yml` | Make the repo public, set Pages to **GitHub Actions**, then run the workflow once. |
 | Red X on a push | A test or the build failed | GitHub, **Actions**, click the red run | The log names the failing test. Nothing deployed, so the live site is the last good version. |
 
@@ -187,7 +189,7 @@ So nothing in the maths depends on what a float does. A price is cents, a volume
 Forms, lists and one drawing. The structure a framework gives you, logic separate from view, is here already.
 
 **Does it fetch prices or tell you what a bottle is worth?**
-No. Every price is typed by the owner. The reference price on a bottle is three typed fields, and no figure uses it. "On sale" is a flag and a note the owner writes.
+No. Every price is typed by the owner. The reference price on a bottle is three typed fields, and no figure uses it. The watchlist is a flag ("Watch this bottle") and a note the owner writes.
 
 **Does it connect to Alexa, Google Home or Apple Home?**
 No. It writes a file and a one-line summary. The guides say which steps a vendor page documents, and I did not run them on a device.
@@ -215,4 +217,4 @@ Say it straight: Claude wrote most of the code as a pair programmer. You chose t
 | Migration | A numbered step that moves a database from one shape to the next |
 | Property test | A test that checks a rule over hundreds of invented inputs |
 | Service worker | A small script the browser keeps so the app opens with no signal |
-| Content-Security-Policy | A tag that tells the browser what the page may load or connect to. Here, nothing outside the page |
+| Content-Security-Policy | A tag that tells the browser what the page may load or connect to. Here the app makes no requests, and the policy blocks fetch, XHR and outside images |

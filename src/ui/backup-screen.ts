@@ -165,7 +165,9 @@ export function backupScreen(ctx: Ctx): HTMLElement {
       const updated = merged.fromIncoming.size - added;
       ctx.flash(`Merged. ${added} added, ${updated} updated, ${incoming.bottles.length - merged.fromIncoming.size} left as they were. You now have ${plural(merged.bottles.length, 'bottle')}.`);
       reset();
-      await ctx.change(() => ctx.vault.replaceAll(merged.bottles, photos));
+      // Write only the rows the import won. Nothing is cleared, so a row on disk that cannot be read survives.
+      const won = merged.bottles.filter((b) => merged.fromIncoming.has(b.id));
+      await ctx.change(() => ctx.vault.putMany(won, photos.filter((p) => merged.fromIncoming.has(p.id))));
     })();
   });
   cancelBtn.addEventListener('click', reset);

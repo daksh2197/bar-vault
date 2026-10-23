@@ -1,7 +1,8 @@
+import { readFileSync } from 'node:fs';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { RUNS } from '../core/fixtures';
-import { hrefFor, navGroup, parseRoute } from './route';
+import { hrefFor, isPageAnchor, navGroup, parseRoute } from './route';
 
 describe('hash routes', () => {
   it.each([
@@ -41,12 +42,28 @@ describe('hash routes', () => {
     '#/constructor',
     '#/toString',
     '#/bottles/' + 'x'.repeat(65),
-    '#' + 'x'.repeat(500),
     '#/STATS',
     '#/stats?x=1',
     '#/bottles/new/extra',
   ])('treats %j as not found', (hash) => {
     expect(parseRoute(hash).name).toBe('notfound');
+  });
+
+  it.each(['#app', '#main', '#hero', '#restock', '#' + 'x'.repeat(500), '#bottles/new'])('treats %j as a jump on the page, not a screen', (hash) => {
+    expect(isPageAnchor(hash)).toBe(true);
+    expect(parseRoute(hash)).toEqual({ name: 'shelf' });
+    expect(parseRoute(hash).name).not.toBe('notfound');
+  });
+
+  it.each(['', '#', '#/', '#/stats', '#/nope', '#/bottles/abc', 'restock'])('does not treat %j as a page anchor', (hash) => {
+    expect(isPageAnchor(hash)).toBe(false);
+  });
+
+  it('points the skip link at an anchor, so it never shows "Page not found"', () => {
+    const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+    const href = /<a class="skip" href="([^"]+)"/.exec(html)?.[1] ?? '';
+    expect(isPageAnchor(href)).toBe(true);
+    expect(parseRoute(href).name).not.toBe('notfound');
   });
 
   it('never throws and always gives a route, whatever the hash (property)', () => {

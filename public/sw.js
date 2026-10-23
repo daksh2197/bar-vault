@@ -1,3 +1,4 @@
+// Adapted from coin-vault (MIT, Daksh Dua)
 /*
  * The service worker: a small script the browser keeps on the phone for this site.
  * Its one job is to save a copy of the app so the app opens with no signal,
