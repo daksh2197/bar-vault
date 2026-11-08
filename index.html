@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    %CSP%
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Bar Vault</title>
+    <meta
+      name="description"
+      content="A home bar ledger: what is on the shelf, how much is left, what each peg cost, what is low. Your data stays on your device."
+    />
+    <meta name="theme-color" content="#111214" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bar Vault" />
+    <meta property="og:description" content="A home bar ledger: shelf, fill levels, price per peg, what is low. Nothing leaves your device." />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <a class="skip" href="#app">Skip to the content</a>
+
+    <header class="site-head" data-chrome>
+      <a class="brand" href="https://dakshdua.ca" aria-label="Daksh Dua, dakshdua.ca">
+        <span class="brand-tile" aria-hidden="true">DD</span>
+        <span>Daksh Dua</span>
+      </a>
+      <nav class="head-links" aria-label="About this tool">
+        <a href="#/about">About</a>
+        <a href="%REPO_URL%">Source</a>
+      </nav>
+    </header>
+
+    <nav class="tabbar" id="tabbar" aria-label="Main">
+      <a href="#/" data-nav="shelf">Shelf</a>
+      <a href="#/bottles" data-nav="bottles">Bottles</a>
+      <a href="#/restock" data-nav="restock">Restock</a>
+      <a href="#/stats" data-nav="stats">Stats</a>
+      <a href="#/more" data-nav="more">More</a>
+    </nav>
+
+    <main id="app" tabindex="-1"></main>
+
+    <footer class="site-foot" data-chrome>
+      <p>
+        MIT licence. Built in Calgary by <a href="https://dakshdua.ca">Daksh Dua</a>.
+        Not affiliated with any brand shown or named by you.
+        <a href="./THIRD-PARTY-NOTICES.txt">Font licences</a>.
+      </p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#111214"/>
+  <!-- a plain bottle, filled to the line in the brand orange -->
+  <defs><clipPath id="b"><path d="M222 90h68v90l62 46v186q0 30-30 30H190q-30 0-30-30V226l62-46z"/></clipPath></defs>
+  <path d="M222 90h68v90l62 46v186q0 30-30 30H190q-30 0-30-30V226l62-46z" fill="#22252a" stroke="#EDE8DD" stroke-opacity=".5" stroke-width="12" stroke-linejoin="round"/>
+  <rect x="150" y="296" width="212" height="200" fill="#FF5A1F" clip-path="url(#b)"/>
+</svg>
